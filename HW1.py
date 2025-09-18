@@ -22,5 +22,17 @@ for table in ['users', 'posts', 'comments', 'reactions', 'follows']:
     print(columns[["name", "type"]])
     print("-------------------------------")
     
+# Task 1.2
+try:
+    notReactedOrPostedUsers = pd.read_sql_query("""
+                            SELECT id FROM users
+                                WHERE users.id NOT IN
+                                    (SELECT DISTINCT(reactions.user_id) FROM reactions
+                                    UNION
+                                    SELECT DISTINCT(posts.user_id) FROM posts);
+                        """, conn)
+    print(len(notReactedOrPostedUsers))
+except Exception as e:
+    print(f"An unexpected error occurred: {e}")
 
 conn.close()
