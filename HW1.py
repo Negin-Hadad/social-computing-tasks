@@ -56,10 +56,34 @@ try:
     
     influencer = []
     for userId in totalEngagementOfUsers['user_id']:
-       influencer.append(pd.read_sql_query(f"SELECT users.username FROM users WHERE users.id='{userId}';", conn)['username'].iloc[0])  
-    totalEngagementOfUsers['username'] = influencer                      
+       influencer.append(pd.read_sql_query(f"SELECT users.username FROM users WHERE users.id='{userId}';", conn)['username'].iloc[0])
+    totalEngagementOfUsers['username'] = influencer
     print(totalEngagementOfUsers.reset_index().drop('index',axis=1))
 except Exception as e:
     print(f"An unexpected error occurred: {e}")  
 
+# Task 1.4
+try:
+    repetitiveContents = pd.read_sql_query("""
+            SELECT user_id, content, repetition, entity FROM
+            (SELECT posts.user_id AS user_id, posts.content AS content, COUNT(posts.content) AS repetition, 'post' AS entity FROM posts 
+            GROUP BY posts.user_id,posts.content 
+            ORDER BY repetition DESC)
+            WHERE repetition>=3
+            UNION ALL
+            SELECT user_id, content, repetition, entity FROM
+            (SELECT comments.user_id AS user_id, comments.content AS content, COUNT(comments.content) AS repetition, 'comment' AS entity FROM comments 
+            GROUP BY comments.user_id,comments.content 
+            ORDER BY repetition DESC)
+            WHERE repetition>=3;                                        
+        """, conn)
+    spammerUsername = []
+    for userId in repetitiveContents['user_id']:
+        spammerUsername.append(pd.read_sql_query(f"SELECT users.username FROM users WHERE users.id='{userId}';", conn)['username'].iloc[0])
+    repetitiveContents['username'] = spammerUsername                           
+    finalSpammers = repetitiveContents.reset_index().drop('index',axis=1)
+    print(finalSpammers)
+except Exception as e:
+    print(f"An unexpected error occurred: {e}")
+ 
 conn.close()
