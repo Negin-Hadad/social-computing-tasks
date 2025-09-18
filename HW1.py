@@ -33,5 +33,33 @@ try:
     print(len(notReactedOrPostedUsers))
 except Exception as e:
     print(f"An unexpected error occurred: {e}")
+    
+# Task 1.3
+try:
+    reactionNumbersBasedOnPostId = pd.read_sql_query("""
+        SELECT posts.id As post_id, posts.user_id, COUNT(reactions.id) AS reactions_count
+        FROM posts 
+        LEFT JOIN reactions ON posts.id = reactions.post_id
+        GROUP BY posts.id
+        ORDER BY reactions_count;                                             
+    """, conn)
+    commentNumbersBasedOnPostId = pd.read_sql_query("""
+        SELECT posts.id As post_id, posts.user_id, COUNT(comments.id) AS comments_count
+        FROM posts 
+        LEFT JOIN comments ON posts.id = comments.post_id
+        GROUP BY posts.id
+        ORDER BY comments_count;                                             
+    """, conn)
+    totalEngagementOfPosts = pd.merge(reactionNumbersBasedOnPostId, commentNumbersBasedOnPostId, on=['post_id','user_id'])
+    totalEngagementOfPosts['engagement_count'] = totalEngagementOfPosts['reactions_count'] + totalEngagementOfPosts['comments_count']
+    totalEngagementOfUsers = (totalEngagementOfPosts.groupby('user_id')['engagement_count'].sum().reset_index().sort_values('engagement_count',ascending=False)).head()
+    
+    influencer = []
+    for userId in totalEngagementOfUsers['user_id']:
+       influencer.append(pd.read_sql_query(f"SELECT users.username FROM users WHERE users.id='{userId}';", conn)['username'].iloc[0])  
+    totalEngagementOfUsers['username'] = influencer                      
+    print(totalEngagementOfUsers.reset_index().drop('index',axis=1))
+except Exception as e:
+    print(f"An unexpected error occurred: {e}")  
 
 conn.close()
