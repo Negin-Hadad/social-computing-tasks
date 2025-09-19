@@ -2,7 +2,7 @@
 import sqlite3
 import pandas as pd
 
-DB_FILE = r"e:\OuluUni\period1\SocialComputing\assignments\database.sqlite"
+DB_FILE = r"e:\database.sqlite"
 
 try:
     conn = sqlite3.connect(DB_FILE)
