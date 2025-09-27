@@ -18,6 +18,7 @@ finally:
         conn.close()
         print("SQLite Database connection closed.")
 
+# Task 2.1
 allPostsDates = posts['created_at'].str[:7].reset_index(name='month')
 allCommentsDates = comments['created_at'].str[:7].reset_index(name='month')
 allActivityDates = pandas.concat([allPostsDates, allCommentsDates])
