@@ -50,3 +50,20 @@ requiredServers = futureTotal / activityPerServer
 print(f"\nServers required (no redundancy) = {round(requiredServers)}")
 requiredServersWithRedundancy = requiredServers * 1.2
 print(f"Servers required (with 20% redundancy) = {round(requiredServersWithRedundancy)}")
+
+# Task 2.2
+commentsCount = comments.groupby("post_id").size().reset_index(name="comment_count")
+reactionsCount = reactions.groupby("post_id").size().reset_index(name="reaction_count")
+
+mergedCounts = pandas.merge(commentsCount, reactionsCount, on="post_id", how="outer").fillna(0)
+mergedCounts['total_count'] = (mergedCounts['comment_count'] + mergedCounts['reaction_count'])
+mergedCountsSorted = mergedCounts.sort_values("total_count", ascending= False).reset_index(drop=True)
+
+viralPosts = mergedCountsSorted.head(3)
+print(f"Three Viral Posts(MAX(comments + reactions)):")
+print(viralPosts)
+
+result =[]
+for viralPostId in viralPosts['post_id']:
+    result.append(posts[posts['id']==viralPostId])
+print(result)
