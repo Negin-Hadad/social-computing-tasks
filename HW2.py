@@ -67,3 +67,18 @@ result =[]
 for viralPostId in viralPosts['post_id']:
     result.append(posts[posts['id']==viralPostId])
 print(result)
+
+# Task 2.3
+minCommentDate = comments.groupby("post_id")["created_at"].min().reset_index().rename(columns={"created_at": "min_comment_created_at", "post_id": "id"})
+mergedDates = pandas.merge(posts, minCommentDate, on="id", how="right")
+mergedDates["min_duration"] = pandas.to_datetime(mergedDates['min_comment_created_at']) - pandas.to_datetime(mergedDates['created_at'])
+mergedDates["min_duration"] = mergedDates["min_duration"].dt.total_seconds()/ 3600 # convert to hours
+minDurationAverage = mergedDates["min_duration"].mean()
+print(f"The average of minimum duration of a post's engagement: {minDurationAverage} hours")
+
+maxCommentDate = comments.groupby("post_id")["created_at"].max().reset_index().rename(columns={"created_at": "max_comment_created_at", "post_id": "id"})
+mergedDates = pandas.merge(posts, maxCommentDate, on="id", how="right")
+mergedDates["max_duration"] = pandas.to_datetime(mergedDates['max_comment_created_at']) - pandas.to_datetime(mergedDates['created_at'])
+mergedDates["max_duration"] = mergedDates["max_duration"].dt.total_seconds()/ 3600 # convert to hours
+maxDurationAverage = mergedDates["max_duration"].mean()
+print(f"The average of maximum duration of a post's engagement: {maxDurationAverage} hours")
