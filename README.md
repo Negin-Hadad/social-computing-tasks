@@ -6,4 +6,4 @@ Negin Hadad
 
 hadad.negin@gmail.com
 
-Negin.Hadad@student.oulu.fi
+nhadad25@student.oulu.fi
