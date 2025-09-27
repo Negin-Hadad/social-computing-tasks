@@ -2,6 +2,7 @@
 import sqlite3
 import pandas
 import matplotlib.pyplot as plt
+import numpy as np
 
 DB_FILE = r"e:\OuluUni\period1\SocialComputing\Homeworks\database.sqlite"
  
@@ -82,3 +83,12 @@ mergedDates["max_duration"] = pandas.to_datetime(mergedDates['max_comment_create
 mergedDates["max_duration"] = mergedDates["max_duration"].dt.total_seconds()/ 3600 # convert to hours
 maxDurationAverage = mergedDates["max_duration"].mean()
 print(f"The average of maximum duration of a post's engagement: {maxDurationAverage} hours")
+
+# Task 2.4
+engagements = pandas.concat([comments[["user_id","post_id"]], reactions[["user_id","post_id"]]], ignore_index=True).rename(columns={"user_id":"viewer_user_id"})
+posts = posts[["id", "user_id"]].rename(columns={"id": "post_id"})
+mergedWithPost = pandas.merge(engagements,posts, on="post_id", how="left").dropna()
+mergedWithPost["user_pair_id"] = list(zip(np.minimum(mergedWithPost["viewer_user_id"], mergedWithPost["user_id"]), np.maximum(mergedWithPost["viewer_user_id"], mergedWithPost["user_id"])))
+engagementCounts = mergedWithPost.groupby("user_pair_id", as_index=False)["post_id"].count().rename(columns={"post_id": "post_count"}).sort_values("post_count", ascending=False)
+topThreePairs = engagementCounts.head(3)
+print(topThreePairs)
